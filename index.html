@@ -17,12 +17,12 @@
                     },
                     colors: {
                         space: {
-                            900: '#05070A',
-                            800: '#0F172A',
-                            700: '#1E293B',
-                            accent: '#00F0FF',
-                            accentHover: '#00C2CC',
-                            danger: '#FF2A6D',
+                            900: 'var(--color-bg-main)',
+                            800: 'var(--color-bg-panel)',
+                            700: 'var(--color-bg-hover)',
+                            accent: 'var(--color-accent)',
+                            accentHover: 'var(--color-accent-hover)',
+                            danger: 'var(--color-danger)',
                         }
                     },
                     animation: {
@@ -40,25 +40,38 @@
         }
     </script>
     <style>
+        :root {
+            /* Default Theme (Cyberpunk) */
+            --color-bg-main: #05070A;
+            --color-bg-panel: #0F172A;
+            --color-bg-hover: #1E293B;
+            --color-accent: #00F0FF;
+            --color-accent-hover: #00C2CC;
+            --color-danger: #FF2A6D;
+        }
+
         body { 
             margin: 0; 
             overflow-x: hidden; 
-            background-color: #05070A; 
+            background-color: var(--color-bg-main); 
             color: #E2E8F0;
+            transition: background-color 0.5s ease;
         }
         
         /* Glassmorphism Utilities */
         .glass-panel {
             background: rgba(15, 23, 42, 0.6);
+            background: color-mix(in srgb, var(--color-bg-panel) 60%, transparent);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(0, 240, 255, 0.1);
+            border: 1px solid color-mix(in srgb, var(--color-accent) 10%, transparent);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.3s ease, background-color 0.3s ease;
         }
         
         .glass-panel:hover {
-            border-color: rgba(0, 240, 255, 0.3);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+            border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+            box-shadow: 0 0 15px color-mix(in srgb, var(--color-accent) 10%, transparent);
         }
 
         .glass-input {
@@ -68,20 +81,20 @@
         }
         
         .glass-input:focus {
-            border-color: #00F0FF;
+            border-color: var(--color-accent);
             outline: none;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 20%, transparent);
         }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #05070A; }
-        ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #00F0FF; }
+        ::-webkit-scrollbar-track { background: var(--color-bg-main); }
+        ::-webkit-scrollbar-thumb { background: var(--color-bg-hover); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
 
         /* Holographic Text Effect */
         .holo-text {
-            text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);
+            text-shadow: 0 0 5px color-mix(in srgb, var(--color-accent) 50%, transparent);
         }
     </style>
 <script type="importmap">

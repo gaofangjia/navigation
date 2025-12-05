@@ -14,7 +14,74 @@ const Icons = {
     ArrowUp: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>,
     ArrowDown: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>,
     Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
-    Menu: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    Menu: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>,
+    Upload: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
+    Palette: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg>
+};
+
+// --- Themes ---
+interface Theme {
+    id: string;
+    name: string;
+    colors: {
+        '--color-bg-main': string;
+        '--color-bg-panel': string;
+        '--color-bg-hover': string;
+        '--color-accent': string;
+        '--color-accent-hover': string;
+        '--color-danger': string;
+    }
+}
+
+const THEMES: Record<string, Theme> = {
+    cyberpunk: {
+        id: 'cyberpunk',
+        name: '赛博朋克 (默认)',
+        colors: {
+            '--color-bg-main': '#05070A',
+            '--color-bg-panel': '#0F172A',
+            '--color-bg-hover': '#1E293B',
+            '--color-accent': '#00F0FF',
+            '--color-accent-hover': '#00C2CC',
+            '--color-danger': '#FF2A6D',
+        }
+    },
+    mars: {
+        id: 'mars',
+        name: '火星救援',
+        colors: {
+            '--color-bg-main': '#0F0404',
+            '--color-bg-panel': '#2A0A0A',
+            '--color-bg-hover': '#3D1212',
+            '--color-accent': '#FF4500',
+            '--color-accent-hover': '#FF6347',
+            '--color-danger': '#FF0000',
+        }
+    },
+    nebula: {
+        id: 'nebula',
+        name: '深空星云',
+        colors: {
+            '--color-bg-main': '#060410',
+            '--color-bg-panel': '#120924',
+            '--color-bg-hover': '#1D1036',
+            '--color-accent': '#C084FC',
+            '--color-accent-hover': '#D8B4FE',
+            '--color-danger': '#F43F5E',
+        }
+    },
+    emerald: {
+        id: 'emerald',
+        name: '翡翠森林',
+        colors: {
+            '--color-bg-main': '#020C06',
+            '--color-bg-panel': '#062C15',
+            '--color-bg-hover': '#094020',
+            '--color-accent': '#10B981',
+            '--color-accent-hover': '#34D399',
+            '--color-danger': '#EF4444',
+        }
+    }
 };
 
 // --- Types ---
@@ -28,10 +95,13 @@ interface Link {
 
 interface SiteConfig {
     title: string;
+    logoUrl?: string;
+    themeId?: string;
 }
 
 const DEFAULT_SITE_CONFIG: SiteConfig = {
-    title: '星际导航'
+    title: '星际导航',
+    themeId: 'cyberpunk'
 };
 
 const DEFAULT_CATEGORIES = [
@@ -54,7 +124,7 @@ const DEFAULT_LINKS: Link[] = [
 ];
 
 // --- Starfield Component ---
-const Starfield = () => {
+const Starfield = ({ themeId }: { themeId: string }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -81,11 +151,29 @@ const Starfield = () => {
         }
 
         const animate = () => {
-            ctx.fillStyle = '#05070A';
+            // Get current theme colors from CSS variables if possible, or mapping
+            // Simpler: use the theme object directly since we have the ID
+            const theme = THEMES[themeId] || THEMES['cyberpunk'];
+            
+            // Clear with semi-transparent rect for trails if desired, but here we do full clear
+            // Actually, for star warp, we want full clear or slight trail.
+            // Using fillStyle from theme logic
+            ctx.fillStyle = theme.colors['--color-bg-main'];
             ctx.fillRect(0, 0, width, height);
 
             const cx = width / 2;
             const cy = height / 2;
+
+            // Accent color for stars
+            const accentHex = theme.colors['--color-accent'];
+            // Convert hex to rgb for rgba usage
+            let r = 200, g = 240, b = 255; // Defaultish
+            if (accentHex.startsWith('#')) {
+                const bigInt = parseInt(accentHex.substring(1), 16);
+                r = (bigInt >> 16) & 255;
+                g = (bigInt >> 8) & 255;
+                b = bigInt & 255;
+            }
 
             for (let i = 0; i < numStars; i++) {
                 let star = stars[i];
@@ -103,7 +191,8 @@ const Starfield = () => {
                 const alpha = (1 - star.z / width);
 
                 ctx.beginPath();
-                ctx.fillStyle = `rgba(200, 240, 255, ${alpha})`;
+                // Mix white with accent
+                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
                 ctx.arc(x, y, radius, 0, Math.PI * 2);
                 ctx.fill();
             }
@@ -124,7 +213,7 @@ const Starfield = () => {
             window.removeEventListener('resize', handleResize);
             cancelAnimationFrame(animId);
         };
-    }, []);
+    }, [themeId]);
 
     return <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full -z-10" />;
 };
@@ -146,8 +235,11 @@ const App = () => {
     const [linkFormData, setLinkFormData] = useState({ title: '', url: '', description: '', category: '' });
     
     // Config editing
-    const [configTab, setConfigTab] = useState<'general' | 'categories'>('general');
+    const [configTab, setConfigTab] = useState<'general' | 'categories' | 'theme'>('general');
     const [configTitle, setConfigTitle] = useState('');
+    const [configLogoUrl, setConfigLogoUrl] = useState('');
+    const [configThemeId, setConfigThemeId] = useState('cyberpunk');
+    
     const [tempCategories, setTempCategories] = useState<string[]>([]);
     const [newCategoryName, setNewCategoryName] = useState('');
     const [editingCategoryIndex, setEditingCategoryIndex] = useState<number | null>(null);
@@ -168,7 +260,12 @@ const App = () => {
         }
 
         if (savedConfig) {
-            setSiteConfig(JSON.parse(savedConfig));
+            const parsedConfig = JSON.parse(savedConfig);
+            setSiteConfig(parsedConfig);
+            // Apply theme on load
+            applyTheme(parsedConfig.themeId || 'cyberpunk');
+        } else {
+            applyTheme('cyberpunk');
         }
 
         if (savedCategories) {
@@ -196,6 +293,14 @@ const App = () => {
         return () => clearInterval(timer);
     }, []);
 
+    const applyTheme = (themeId: string) => {
+        const theme = THEMES[themeId] || THEMES['cyberpunk'];
+        const root = document.documentElement;
+        Object.entries(theme.colors).forEach(([property, value]) => {
+            root.style.setProperty(property, value);
+        });
+    };
+
     // --- Handlers: Site Config ---
     const toggleAdmin = () => {
         if (!isAdmin) {
@@ -208,20 +313,36 @@ const App = () => {
 
     const openConfigModal = () => {
         setConfigTitle(siteConfig.title);
+        setConfigLogoUrl(siteConfig.logoUrl || '');
+        setConfigThemeId(siteConfig.themeId || 'cyberpunk');
         setTempCategories([...categories]);
         setConfigTab('general');
         setIsConfigModalOpen(true);
     };
 
     const saveConfig = () => {
-        setSiteConfig({ ...siteConfig, title: configTitle });
+        const newConfig = { 
+            ...siteConfig, 
+            title: configTitle,
+            logoUrl: configLogoUrl,
+            themeId: configThemeId
+        };
+        setSiteConfig(newConfig);
+        applyTheme(configThemeId);
         
-        // Handle category updates: if a category was renamed, we might need to update links? 
-        // For simplicity, we just save the list structure for now. 
-        // If we wanted robust renaming, we would map old names to new names.
-        // Here we just replace the category list structure.
         setCategories(tempCategories);
         setIsConfigModalOpen(false);
+    };
+
+    const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setConfigLogoUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     // Category Management Handlers
@@ -237,14 +358,7 @@ const App = () => {
 
     const handleCategoryDelete = (index: number) => {
         if (confirm('确定要删除此分类吗？该分类下的链接将变为“未分类”。')) {
-            const deletedCat = tempCategories[index];
             setTempCategories(tempCategories.filter((_, i) => i !== index));
-            // Update links to remove this category (visual only until saved?)
-            // We should strictly separate config save from link updates, but for UX, let's auto-update links
-            // when the config is saved. *Correction*: Complex state sync. 
-            // Better approach: Update `links` state immediately when saving config if categories changed.
-            // But here we are just manipulating `tempCategories`.
-            // Let's defer link updates to the `saveConfig` function.
         }
     };
 
@@ -265,14 +379,9 @@ const App = () => {
         const newName = editingCategoryValue.trim();
         
         if (newName && newName !== oldName) {
-            // Update list
             const newCats = [...tempCategories];
             newCats[index] = newName;
             setTempCategories(newCats);
-            
-            // Update links immediately? No, wait for Save button.
-            // To make it persistent, we need to track renames. 
-            // For this simple app, let's just update the links that match the oldName when we save.
             setLinks(prev => prev.map(l => l.category === oldName ? { ...l, category: newName } : l));
         }
         setEditingCategoryIndex(null);
@@ -324,34 +433,34 @@ const App = () => {
         const el = document.getElementById(`cat-${cat}`);
         if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            // Offset for sticky header
             window.scrollBy(0, -80);
         }
     };
 
-    // Sort links based on category order
     const getLinksByCategory = (cat: string) => links.filter(l => l.category === cat);
     
-    // Find categories that have links but aren't in the main list (e.g. legacy data)
     const extraCategories = Array.from(new Set(links.map(l => l.category)))
         .filter(c => !categories.includes(c) && c !== '未分类');
 
     const displayCategories = [...categories, ...extraCategories];
-    // Add "Uncategorized" if there are any
     const uncategorizedLinks = links.filter(l => !displayCategories.includes(l.category) || l.category === '未分类');
     
     return (
-        <div className="min-h-screen text-gray-100 font-rajdhani selection:bg-space-accent selection:text-space-900 flex flex-col">
-            <Starfield />
+        <div className="min-h-screen text-gray-100 font-rajdhani selection:bg-space-accent selection:text-space-900 flex flex-col transition-colors duration-500">
+            <Starfield themeId={siteConfig.themeId || 'cyberpunk'} />
 
             {/* Navbar */}
             <header className="fixed top-0 w-full z-40 border-b border-white/10 glass-panel">
-                <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
+                <div className="w-full px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
                         <div className="text-space-accent animate-spin-slow">
-                            <Icons.Rocket />
+                            {siteConfig.logoUrl ? (
+                                <img src={siteConfig.logoUrl} alt="Logo" className="w-10 h-10 object-contain rounded-full shadow-[0_0_10px_var(--color-accent)]" />
+                            ) : (
+                                <Icons.Rocket />
+                            )}
                         </div>
-                        <h1 className="text-xl md:text-2xl font-orbitron font-bold tracking-widest text-white holo-text uppercase hidden sm:block">
+                        <h1 className="text-2xl md:text-3xl font-orbitron font-bold tracking-widest text-white holo-text uppercase hidden sm:block">
                             {siteConfig.title}
                         </h1>
                         <h1 className="text-xl font-orbitron font-bold tracking-widest text-white holo-text uppercase sm:hidden">
@@ -359,9 +468,8 @@ const App = () => {
                         </h1>
                     </div>
                     
-                    <div className="flex items-center space-x-4 md:space-x-6">
-                         {/* Mobile Category Scroll (Optional, but useful) */}
-                         <div className="flex md:hidden overflow-x-auto space-x-2 max-w-[150px] scrollbar-hide">
+                    <div className="flex items-center space-x-4 md:space-x-8">
+                         <div className="flex md:hidden overflow-x-auto space-x-2 max-w-[120px] scrollbar-hide">
                             {displayCategories.map(cat => (
                                 <button key={cat} onClick={() => scrollToCategory(cat)} className="text-xs text-gray-400 whitespace-nowrap">
                                     {cat}
@@ -370,14 +478,14 @@ const App = () => {
                         </div>
 
                         <div className="hidden md:block text-right">
-                            <div className="text-sm text-space-accent font-orbitron">
+                            <div className="text-2xl font-bold text-space-accent font-orbitron tracking-wide holo-text">
                                 {currentTime.toLocaleTimeString([], { hour12: false })}
                             </div>
                         </div>
                         
                         <button 
                             onClick={toggleAdmin}
-                            className={`p-2 rounded-full transition-all duration-300 ${isAdmin ? 'bg-space-accent text-space-900 shadow-[0_0_15px_#00F0FF]' : 'hover:bg-white/10 text-gray-400 hover:text-white'}`}
+                            className={`p-2 rounded-full transition-all duration-300 ${isAdmin ? 'bg-space-accent text-space-900 shadow-[0_0_15px_var(--color-accent)]' : 'hover:bg-white/10 text-gray-400 hover:text-white'}`}
                             title={isAdmin ? "退出管理模式" : "进入管理模式"}
                         >
                             <Icons.Settings />
@@ -386,13 +494,13 @@ const App = () => {
                 </div>
             </header>
 
-            <div className="flex pt-16 flex-1">
+            <div className="flex pt-20 flex-1">
                 {/* Desktop Sidebar */}
-                <aside className="hidden md:block w-64 fixed left-0 top-16 bottom-0 border-r border-white/10 glass-panel z-30 overflow-y-auto px-4 py-8">
+                <aside className="hidden md:block w-64 fixed left-0 top-20 bottom-0 border-r border-white/10 glass-panel z-30 overflow-y-auto px-4 py-8">
                     <nav className="space-y-2">
                         {displayCategories.map((cat) => {
                             const count = getLinksByCategory(cat).length;
-                            if (count === 0 && !isAdmin) return null; // Hide empty categories for visitors
+                            if (count === 0 && !isAdmin) return null;
                             return (
                                 <button
                                     key={cat}
@@ -520,7 +628,6 @@ const App = () => {
                                                             )}
                                                         </div>
                                                     </div>
-                                                    {/* Decorative corner accents */}
                                                     <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-space-accent/0 group-hover:border-space-accent/100 transition-all duration-300 -translate-x-1 -translate-y-1 opacity-0 group-hover:opacity-100"></div>
                                                     <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-space-accent/0 group-hover:border-space-accent/100 transition-all duration-300 translate-x-1 translate-y-1 opacity-0 group-hover:opacity-100"></div>
                                                 </a>
@@ -541,7 +648,6 @@ const App = () => {
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                     {uncategorizedLinks.map((link) => (
-                                        /* Same card structure for uncategorized */
                                         <a 
                                             key={link.id}
                                             href={link.url}
@@ -687,19 +793,25 @@ const App = () => {
                                 onClick={() => setConfigTab('general')}
                                 className={`flex-1 py-3 text-sm font-bold tracking-wider transition-colors ${configTab === 'general' ? 'bg-space-accent/10 text-space-accent border-b-2 border-space-accent' : 'text-gray-400 hover:text-white'}`}
                             >
-                                基本设置
+                                基本
                             </button>
                             <button 
                                 onClick={() => setConfigTab('categories')}
                                 className={`flex-1 py-3 text-sm font-bold tracking-wider transition-colors ${configTab === 'categories' ? 'bg-space-accent/10 text-space-accent border-b-2 border-space-accent' : 'text-gray-400 hover:text-white'}`}
                             >
-                                分类管理
+                                分类
+                            </button>
+                            <button 
+                                onClick={() => setConfigTab('theme')}
+                                className={`flex-1 py-3 text-sm font-bold tracking-wider transition-colors ${configTab === 'theme' ? 'bg-space-accent/10 text-space-accent border-b-2 border-space-accent' : 'text-gray-400 hover:text-white'}`}
+                            >
+                                主题
                             </button>
                         </div>
                         
                         {/* Scrollable Content */}
                         <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
-                            {configTab === 'general' ? (
+                            {configTab === 'general' && (
                                 <div className="space-y-6">
                                     <div>
                                         <label className="block text-xs font-mono text-gray-400 mb-2 uppercase">网站名称 (Site Title)</label>
@@ -709,13 +821,41 @@ const App = () => {
                                             value={configTitle}
                                             onChange={e => setConfigTitle(e.target.value)}
                                         />
-                                        <p className="text-xs text-gray-500 mt-2">显示在浏览器标签页和左上角Logo处。</p>
                                     </div>
+                                    
+                                    <div>
+                                        <label className="block text-xs font-mono text-gray-400 mb-2 uppercase">Logo 设置</label>
+                                        <div className="flex items-center space-x-4 mb-3">
+                                            <div className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center bg-black/40 overflow-hidden relative group">
+                                                {configLogoUrl ? (
+                                                    <img src={configLogoUrl} alt="Preview" className="w-full h-full object-contain" />
+                                                ) : (
+                                                    <div className="text-space-accent"><Icons.Rocket /></div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1">
+                                                <label className="cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-2 rounded block text-center text-sm transition-colors mb-2">
+                                                    <span className="flex items-center justify-center gap-2"><Icons.Upload /> 上传图片</span>
+                                                    <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <input 
+                                            type="text" 
+                                            placeholder="或输入图片 URL..."
+                                            className="w-full px-4 py-2 rounded bg-black/40 border border-white/10 focus:border-space-accent focus:outline-none text-white text-sm"
+                                            value={configLogoUrl}
+                                            onChange={e => setConfigLogoUrl(e.target.value)}
+                                        />
+                                    </div>
+
                                     <div className="p-4 rounded bg-blue-900/20 border border-blue-500/30 text-sm text-blue-200">
                                         提示：所有数据均存储在您的本地浏览器中，清除缓存可能会导致数据丢失。
                                     </div>
                                 </div>
-                            ) : (
+                            )}
+
+                            {configTab === 'categories' && (
                                 <div className="space-y-6">
                                     <div className="flex gap-2 mb-4">
                                         <input 
@@ -788,7 +928,39 @@ const App = () => {
                                             </div>
                                         ))}
                                     </div>
-                                    <p className="text-xs text-gray-500 text-center pt-2">拖拽排序功能开发中，请使用箭头调整顺序。</p>
+                                </div>
+                            )}
+
+                            {configTab === 'theme' && (
+                                <div className="space-y-4">
+                                    <p className="text-sm text-gray-400 mb-4">选择一个主题以改变控制台的视觉风格。</p>
+                                    <div className="grid grid-cols-1 gap-4">
+                                        {Object.values(THEMES).map(theme => (
+                                            <button
+                                                key={theme.id}
+                                                onClick={() => setConfigThemeId(theme.id)}
+                                                className={`relative p-4 rounded-xl border-2 transition-all flex items-center justify-between group overflow-hidden ${configThemeId === theme.id ? 'border-space-accent bg-white/10' : 'border-white/10 hover:border-white/30 bg-black/20'}`}
+                                            >
+                                                <div className="flex items-center gap-4 z-10">
+                                                    <div 
+                                                        className="w-10 h-10 rounded-full shadow-lg"
+                                                        style={{ background: `linear-gradient(135deg, ${theme.colors['--color-bg-panel']}, ${theme.colors['--color-accent']})` }}
+                                                    ></div>
+                                                    <div className="text-left">
+                                                        <div className={`font-bold font-rajdhani text-lg ${configThemeId === theme.id ? 'text-white' : 'text-gray-300'}`}>{theme.name}</div>
+                                                    </div>
+                                                </div>
+                                                {configThemeId === theme.id && (
+                                                    <div className="text-space-accent z-10"><Icons.Check /></div>
+                                                )}
+                                                {/* Preview Background */}
+                                                <div 
+                                                    className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity"
+                                                    style={{ background: theme.colors['--color-bg-main'] }}
+                                                ></div>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
